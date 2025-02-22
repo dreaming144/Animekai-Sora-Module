@@ -1,0 +1,11 @@
+{
+  "name": "Animekai",
+  "baseURL": "https://animekai.to",
+  "version": "1.0.0",
+  "author": "Assistant (Adapted from phisher98/CloudStream)",
+  "description": "Animekai.to source for Sora, adapted from CloudStream 3 module",
+  "lang": "en",
+  "type": "anime",
+  "mode": "async",
+  "script": "animekai-to.js"
+}
