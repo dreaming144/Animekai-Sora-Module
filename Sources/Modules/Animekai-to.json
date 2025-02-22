@@ -1,9 +1,9 @@
 {
     "sourceName": "Animekai",
-    "iconUrl": "https://animekai.to/favicon.ico", // Placeholder; replace with actual favicon URL if available
+    "iconUrl": "https://animekai.to/assets/uploads/37585a39fe8c8d8fafaa2c7bfbf5374ecac859ea6a0886b7dc.png", // Placeholder; replace with actual favicon URL if available
     "author": {
         "name": "Assistant (Adapted from phisher98/CloudStream)",
-        "icon": "https://via.placeholder.com/150" // Placeholder; replace with your or phisher98’s icon URL if available
+        "icon": "https://animekai.to/assets/uploads/37585a39fe8c8d8fafaa2c7bfbf5374ecac859ea6a0886b7dc.png" // Placeholder; replace with your or phisher98’s icon URL if available
     },
     "version": "1.0.0",
     "language": "English",
