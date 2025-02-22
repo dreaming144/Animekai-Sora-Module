@@ -5,8 +5,6 @@
 // @description  Animekai.to source for Sora, adapted from CloudStream 3 module
 // ==/SoraModule==
 
-const cheerio = require('cheerio');
-
 export const metadata = {
     name: 'Animekai',
     baseURL: 'https://animekai.to',
@@ -20,7 +18,7 @@ export const metadata = {
 
 class AnimekaiDecoder {
     base64UrlEncode(str) {
-        const base64Encoded = Buffer.from(str, 'iso-8859-1').toString('base64');
+        const base64Encoded = btoa(unescape(encodeURIComponent(str)));
         return base64Encoded.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     }
 
@@ -28,7 +26,7 @@ class AnimekaiDecoder {
         const padded = n.padEnd(n.length + ((4 - (n.length % 4)) % 4), '=')
             .replace(/-/g, '+')
             .replace(/_/g, '/');
-        return Buffer.from(padded, 'base64').toString('iso-8859-1');
+        return decodeURIComponent(escape(atob(padded)));
     }
 
     transform(key, text) {
@@ -107,17 +105,18 @@ export const search = async ({ query, page = 1 }) => {
         const searchUrl = `${metadata.baseURL}/browser?keyword=${encodeURIComponent(query)}&page=${page}`;
         const response = await fetch(searchUrl);
         const html = await response.text();
-        const $ = cheerio.load(html);
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
 
         const results = [];
-        $('.aitem-wrapper div.aitem').each((_, element) => {
-            const $element = $(element);
-            const href = $element.find('a.poster').attr('href') || '';
-            const title = $element.find('a.title').text().trim() || 'Unknown Title';
-            const subCount = $element.find('div.info span.sub').text().trim().match(/\d+/)?.[0] || 0;
-            const dubCount = $element.find('div.info span.dub').text().trim().match(/\d+/)?.[0] || 0;
-            const posterUrl = $element.find('a.poster img').attr('data-src') || '';
-            const typeText = $element.find('div.fd-infor > span.fdi-item').text().trim() || '';
+        const items = doc.querySelectorAll('.aitem-wrapper div.aitem');
+        items.forEach(element => {
+            const href = element.querySelector('a.poster')?.getAttribute('href') || '';
+            const title = element.querySelector('a.title')?.textContent.trim() || 'Unknown Title';
+            const subCount = element.querySelector('div.info span.sub')?.textContent.trim().match(/\d+/)?.[0] || 0;
+            const dubCount = element.querySelector('div.info span.dub')?.textContent.trim().match(/\d+/)?.[0] || 0;
+            const posterUrl = element.querySelector('a.poster img')?.getAttribute('data-src') || '';
+            const typeText = element.querySelector('div.fd-infor > span.fdi-item')?.textContent.trim() || '';
             const type = getType(typeText);
 
             results.push({
@@ -133,7 +132,7 @@ export const search = async ({ query, page = 1 }) => {
             });
         });
 
-        const hasNextPage = $('.pagination .next').length > 0;
+        const hasNextPage = doc.querySelector('.pagination .next') !== null;
 
         return {
             results: results.length ? results : [],
@@ -150,32 +149,32 @@ export const info = async ({ id }) => {
         const url = `${metadata.baseURL}/watch/${id}`;
         const response = await fetch(url);
         const html = await response.text();
-        const $ = cheerio.load(html);
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
 
-        const title = $('.title').text().trim() || 'Unknown Title';
-        const japTitle = $('.title').attr('data-jp') || title; // Assuming data-jp is available
-        const poster = $('.watch-section-bg').attr('style')?.match(/url\(['"]?(.*?)['"]?\)/)?.[1] || '';
-        const animeId = $('.rate-box').attr('data-id') || id;
-        const malId = $('.watch-section').attr('data-mal-id')?.match(/\d+/)?.[0] || null;
-        const aniListId = $('.watch-section').attr('data-al-id')?.match(/\d+/)?.[0] || null;
+        const title = doc.querySelector('.title')?.textContent.trim() || 'Unknown Title';
+        const japTitle = doc.querySelector('.title')?.getAttribute('data-jp') || title; // Assuming data-jp is available
+        const poster = doc.querySelector('.watch-section-bg')?.getAttribute('style')?.match(/url\(['"]?(.*?)['"]?\)/)?.[1] || '';
+        const animeId = doc.querySelector('.rate-box')?.getAttribute('data-id') || id;
+        const malId = doc.querySelector('.watch-section')?.getAttribute('data-mal-id')?.match(/\d+/)?.[0] || null;
+        const aniListId = doc.querySelector('.watch-section')?.getAttribute('data-al-id')?.match(/\d+/)?.[0] || null;
 
-        const subCount = $('.info span.sub').text().trim().match(/\d+/)?.[0] || 0;
-        const dubCount = $('.info span.dub').text().trim().match(/\d+/)?.[0] || 0;
+        const subCount = doc.querySelector('.info span.sub')?.textContent.trim().match(/\d+/)?.[0] || 0;
+        const dubCount = doc.querySelector('.info span.dub')?.textContent.trim().match(/\d+/)?.[0] || 0;
 
         // Fetch episodes via AJAX (using AnimekaiDecoder for token)
         const token = decoder.generateToken(animeId);
         const episodesUrl = `${metadata.baseURL}/ajax/episodes/list?ani_id=${animeId}&_=${token}`;
         const episodesResponse = await fetch(episodesUrl);
         const episodesData = await episodesResponse.text();
-        const $episodes = cheerio.load(episodesData);
+        const episodesDoc = parser.parseFromString(episodesData, 'text/html');
 
         const subEpisodes = [];
         const dubEpisodes = [];
-        $episodes('.eplist a').each((_, element) => {
-            const $ep = $(element);
-            const episodeNum = $ep.attr('num')?.match(/\d+/)?.[0] || (subEpisodes.length + dubEpisodes.length + 1);
-            const episodeToken = $ep.attr('token') || '';
-            const episodeName = $ep.find('span').text().trim() || `Episode ${episodeNum}`;
+        episodesDoc.querySelectorAll('.eplist a').forEach(element => {
+            const episodeNum = element.getAttribute('num')?.match(/\d+/)?.[0] || (subEpisodes.length + dubEpisodes.length + 1);
+            const episodeToken = element.getAttribute('token') || '';
+            const episodeName = element.querySelector('span')?.textContent.trim() || `Episode ${episodeNum}`;
 
             if (subEpisodes.length < subCount) {
                 subEpisodes.push({
@@ -195,16 +194,17 @@ export const info = async ({ id }) => {
             }
         });
 
-        const genres = $('.detail a').filter((_, el) => $(el).attr('href')?.includes('/genres/')).map((_, el) => $(el).text().trim()).get();
-        const statusText = $('.detail div:contains(Status) span').text().trim() || 'Completed';
+        const genres = Array.from(doc.querySelectorAll('.detail a'))
+            .filter(el => el.getAttribute('href')?.includes('/genres/'))
+            .map(el => el.textContent.trim());
+        const statusText = doc.querySelector('.detail div:contains(Status) span')?.textContent.trim() || 'Completed';
         const status = getStatus(statusText);
 
         const recommendations = [];
-        $('.aitem-col a').each((_, element) => {
-            const $rec = $(element);
-            const recHref = $rec.attr('href') || '';
-            const recTitle = $rec.find('div.title').text().trim() || 'Unknown';
-            const recPoster = $rec.attr('style')?.match(/url\(['"]?(.*?)['"]?\)/)?.[1] || '';
+        doc.querySelectorAll('.aitem-col a').forEach(element => {
+            const recHref = element.getAttribute('href') || '';
+            const recTitle = element.querySelector('div.title')?.textContent.trim() || 'Unknown';
+            const recPoster = element.getAttribute('style')?.match(/url\(['"]?(.*?)['"]?\)/)?.[1] || '';
             recommendations.push({
                 title: recTitle,
                 url: recHref.startsWith('http') ? recHref : `${metadata.baseURL}${recHref}`,
@@ -245,11 +245,11 @@ export const sources = async ({ id }) => {
         const serversUrl = `${metadata.baseURL}/ajax/links/list?token=${token}&_=${serverToken}`;
         const serversResponse = await fetch(serversUrl);
         const serversData = await serversResponse.text();
-        const $servers = cheerio.load(serversData);
+        const serversDoc = new DOMParser().parseFromString(serversData, 'text/html');
 
         const sources = [];
-        const serverIds = $servers('div.server-items[data-id="' + (type == 'sub' ? 'raw' : 'dub') + '"] span[data-lid]')
-            .map((_, el) => $(el).attr('data-lid')).get().distinct();
+        const serverIds = Array.from(serversDoc.querySelectorAll(`div.server-items[data-id="${type == 'sub' ? 'raw' : 'dub'}"] span[data-lid]`))
+            .map(el => el.getAttribute('data-lid')).distinct();
 
         for (const serverId of serverIds) {
             const linkToken = decoder.generateToken(serverId);
@@ -265,13 +265,15 @@ export const sources = async ({ id }) => {
                         url: iframeUrl,
                         quality: 'auto',
                         isM3U8: iframeUrl.includes('.m3u8'),
-                        name: 'MegaUp' // Optional: Name for identification
+                        name: 'MegaUp', // Optional: Name for identification
+                        subtitles: [] // Placeholder for soft subtitles; verify if available
                     });
                 } else {
                     sources.push({
                         url: iframeUrl.startsWith('http') ? iframeUrl : `${metadata.baseURL}${iframeUrl}`,
                         quality: 'auto',
-                        isM3U8: iframeUrl.includes('.m3u8')
+                        isM3U8: iframeUrl.includes('.m3u8'),
+                        subtitles: [] // Placeholder for soft subtitles; verify if available
                     });
                 }
             }
