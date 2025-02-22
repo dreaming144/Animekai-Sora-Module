@@ -1,11 +1,16 @@
 {
-  "name": "Animekai",
-  "baseURL": "https://animekai.to",
-  "version": "1.0.0",
-  "author": "Assistant (Adapted from phisher98/CloudStream)",
-  "description": "Animekai.to source for Sora, adapted from CloudStream 3 module",
-  "lang": "en",
-  "type": "anime",
-  "mode": "async",
-  "script": "animekai-to.js"
+    "sourceName": "Animekai",
+    "iconUrl": "https://animekai.to/favicon.ico", // Placeholder; replace with actual favicon URL if available
+    "author": {
+        "name": "Assistant (Adapted from phisher98/CloudStream)",
+        "icon": "https://via.placeholder.com/150" // Placeholder; replace with your or phisher98’s icon URL if available
+    },
+    "version": "1.0.0",
+    "language": "English",
+    "streamType": "HLS", // Placeholder; adjust based on Animekai.to’s stream format (e.g., HLS, MP4)
+    "quality": "1080p", // Placeholder; adjust based on Animekai.to’s typical quality
+    "baseUrl": "https://animekai.to",
+    "searchBaseUrl": "https://animekai.to/browser?keyword=%s&page=%d", // Matches search pattern with pagination
+    "scriptUrl": "https://raw.githubusercontent.com/dreaming144/Animekai-Sora-Module/main/Sources/Modules/animekai-to.js", // Update with your GitHub repo URL
+    "asyncJS": true
 }
