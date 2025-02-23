@@ -11,6 +11,6 @@
     "quality": "1080p", 
     "baseUrl": "https://animekai.to",
     "searchBaseUrl": "https://animekai.to/browser?keyword=%s&page=%d", 
-    "scriptUrl": "https://raw.githubusercontent.com/dreaming144/Animekai-Sora-Module/refs/heads/main/Sources/Modules/animekai-to.js", // Update with your GitHub repo URL
+    "scriptUrl": "https://raw.githubusercontent.com/dreaming144/Animekai-Sora-Module/refs/heads/main/Sources/Modules/animekai-to.js",
     "asyncJS": true
 }
