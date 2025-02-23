@@ -1,3 +1,6 @@
+EXPERIMENTAL DON'T USE YET
+
+
 # Animekai Sora Module
 
 This repository contains a source module for Animekai.to, compatible with the Sora app (https://github.com/cranci1/Sora), adapted from the CloudStream 3 module by phisher98.
