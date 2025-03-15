@@ -1,1 +1,16 @@
-
+{
+    "sourceName": "Animekai",
+    "iconUrl": "https://animekai.to/assets/uploads/37585a39fe8c8d8fafaa2c7bfbf5374ecac859ea6a0886b7dc.png", 
+    "author": {
+        "name": "Assistant (Adapted from phisher98/CloudStream)",
+        "icon": "https://animekai.to/assets/uploads/37585a39fe8c8d8fafaa2c7bfbf5374ecac859ea6a0886b7dc.png" 
+    },
+    "version": "1.0.0",
+    "language": "English",
+    "streamType": "HLS", 
+    "quality": "1080p", 
+    "baseUrl": "https://animekai.to",
+    "searchBaseUrl": "https://animekai.to/browser?keyword=%s&page=%d", 
+    "scriptUrl": "https://raw.githubusercontent.com/dreaming144/Animekai-Sora-Module/refs/heads/main/Sources/Modules/animekai-to.js",
+    "asyncJS": true
+}
